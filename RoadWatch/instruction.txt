@@ -1,0 +1,57 @@
+instruction for data base set up in the myphp local host:
+
+CREATE DATABASE IF NOT EXISTS roadwatch_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE roadwatch_db;
+
+
+//just below copy and paste it in the SQL and click "go"
+
+
+
+CREATE TABLE IF NOT EXISTS admins (
+    id         INT          AUTO_INCREMENT PRIMARY KEY,
+    username   VARCHAR(50)  NOT NULL UNIQUE,
+    password   VARCHAR(255) NOT NULL,
+    full_name  VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO admins (username, password, full_name)
+VALUES ('admin', 'admin123', 'DPWH System Administrator');
+
+CREATE TABLE IF NOT EXISTS citizens (
+    id             INT          AUTO_INCREMENT PRIMARY KEY,
+    full_name      VARCHAR(100) NOT NULL,
+    email          VARCHAR(100) NOT NULL UNIQUE,
+    contact_number VARCHAR(20)  NOT NULL,
+    password       VARCHAR(255) NOT NULL,
+    created_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS damage_reports (
+    id             INT          AUTO_INCREMENT PRIMARY KEY,
+    report_code    VARCHAR(20)  NOT NULL UNIQUE,
+    citizen_id     INT          NULL,
+    reporter_name  VARCHAR(100) NOT NULL,
+    contact_number VARCHAR(20)  NOT NULL,
+    damage_type    VARCHAR(60)  NOT NULL,
+    location       VARCHAR(255) NOT NULL,
+    severity       VARCHAR(20)  NOT NULL,
+    description    TEXT,
+    photo          LONGBLOB,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'Pending',
+    admin_remarks  TEXT,
+    submitted_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_citizen FOREIGN KEY (citizen_id) REFERENCES citizens(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO citizens (full_name, email, contact_number, password)
+VALUES ('Jimuel Mupra', 'mupra@email.com', '09171234567', 'test123');
+
+INSERT IGNORE INTO damage_reports (report_code, citizen_id, reporter_name, contact_number, damage_type, location, severity, description, status, admin_remarks)
+VALUES
+('RPT-20250517-0001', NULL, 'jefferson Lacson',   '09181234567', 'Pothole',          'Rizal Ave, Bacolod City',          'High',   'Large pothole near the intersection causing traffic.',          'In Progress', 'DPWH crew scheduled for repair next week.'),
+('RPT-20250517-0002', NULL, 'Jimuel lacson',    '09191234567', 'Broken Guardrail', 'Lacson St, Bacolod City',          'Medium', 'Guardrail near the bridge is bent and broken.',                'Pending',     NULL),
+('RPT-20250517-0003', 1,    'Jimuel Mupra', '09171234567', 'Cracked Road',     'Circumferential Rd, Bacolod City', 'Medium', 'Long crack stretching about 10 meters along the road.',        'Resolved',    'Road has been patched. Thank you for reporting.'),
+('RPT-20250517-0004', 1,    'Jimuel Mupra', '09171234567', 'Flooded Road',     'Singcang, Bacolod City',           'High',   'Road floods every time it rains heavily, no drainage.',        'Pending',     NULL);
